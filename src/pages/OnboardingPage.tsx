@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { Check, Loader2, ArrowRight, ArrowLeft } from 'lucide-react'
-import EggAvatar, { AvatarConfig } from '../components/EggAvatar'
+import { Loader2, ArrowRight, ArrowLeft } from 'lucide-react'
+import EggAvatar from '../components/EggAvatar'
+import type { AvatarConfig } from '../components/EggAvatar'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const SHELL_COLORS = [
@@ -244,6 +245,33 @@ const OnboardingPage: React.FC = () => {
                   {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <>Join Class <ArrowRight className="w-5 h-5" /></>}
                 </button>
                 <button onClick={() => setRole(null)} className="w-full text-gray-500 text-sm font-bold">Change Role</button>
+              </motion.div>
+            )}
+
+            {role === 'student' && step === 1 && (
+              <motion.div 
+                key="student-name" 
+                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <div className="py-8 space-y-4">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-teal ml-2">Your Explorer Name</label>
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Enter Your Name"
+                    className="w-full bg-navy/50 border-4 border-white/5 rounded-3xl py-6 px-8 text-2xl font-fredoka text-center focus:border-gold outline-none transition-all"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <button 
+                  disabled={!name}
+                  onClick={() => setStep(2)}
+                  className="btn-primary w-full flex items-center justify-center gap-2 py-5"
+                >
+                  Next: Customize Eggy <ArrowRight className="w-5 h-5" />
+                </button>
               </motion.div>
             )}
 

@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Map as MapIcon, Lock, CheckCircle2, Star, ChevronRight, X } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { MISSIONS, Mission } from '../data/missions'
-import CharacterSprite, { CharacterType } from '../components/CharacterSprite'
+import { MISSIONS } from '../data/missions'
+import CharacterSprite from '../components/CharacterSprite'
 
 interface StateNode {
   name: string
@@ -25,7 +25,7 @@ const NIGERIA_STATES: StateNode[] = [
 ]
 
 const ExplorerPage: React.FC = () => {
-  const { profile, updateProfile } = useAuth()
+  const { profile } = useAuth()
   const navigate = useNavigate()
   const [selectedState, setSelectedState] = useState<StateNode | null>(null)
 

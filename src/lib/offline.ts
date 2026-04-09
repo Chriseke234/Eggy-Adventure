@@ -1,5 +1,4 @@
-import { hatchPrompt, HatchResult } from './gemini'
-import { supabase } from './supabase'
+import { hatchPrompt } from './gemini'
 import { saveSession } from './sessions'
 
 interface QueuedHatch {

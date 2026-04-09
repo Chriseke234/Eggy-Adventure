@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { HeartPulse, ArrowRight, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react'
+import { HeartPulse, ArrowRight, Sparkles } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { hatchPrompt, HatchResult } from '../lib/gemini'
+import { hatchPrompt } from '../lib/gemini'
+import type { HatchResult } from '../lib/gemini'
 import { saveSession } from '../lib/sessions'
-import EggAvatar, { AvatarConfig } from '../components/EggAvatar'
 import CharacterSprite from '../components/CharacterSprite'
 import VoiceInput from '../components/VoiceInput'
 import ScoreBreakdown from '../components/ScoreBreakdown'
@@ -58,14 +58,7 @@ const HospitalPage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [healedCount, setHealedCount] = useState(0) // Local state, should ideally be from profile
 
-  const defaultAvatarConfig: AvatarConfig = {
-    shellColor: '#2A9D8F',
-    outfit: 'none',
-    accessory: 'none',
-    expression: 'happy'
-  }
 
-  const avatarConfig = profile?.avatar_config || defaultAvatarConfig
 
   const totalScore = (res: HatchResult) => 
     res.score_clarity + res.score_specificity + res.score_creativity + res.score_effectiveness
@@ -142,10 +135,10 @@ const HospitalPage: React.FC = () => {
             exit={{ opacity: 0, y: -20 }}
             className="space-y-6 text-center"
           >
-            <div className="relative inline-block">
-               <div className="flex justify-center">
-                  <CharacterSprite type="fix-it-favour" state={stage === 'TREATMENT' ? 'talking' : 'idle'} size={150} />
-               </div>
+             <div className="relative inline-block">
+                <div className="flex justify-center">
+                   <CharacterSprite type="fix-it-favour" state="idle" size={150} />
+                </div>
                <div className="absolute -top-2 -right-4 bg-white text-navy px-3 py-1 rounded-xl font-bold text-xs shadow-lg rotate-12">
                   Emergency!
                </div>

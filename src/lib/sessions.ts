@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { HatchResult } from './gemini';
+import type { HatchResult } from './gemini';
 
 export async function saveSession(userId: string, missionId: string, missionName: string, prompt: string, result: HatchResult, roundNumber: number = 1) {
   const { data, error } = await supabase

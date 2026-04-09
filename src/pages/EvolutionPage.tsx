@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState } from 'react'
+import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Zap, TrendingUp, History, Trophy, ArrowRight, Sparkles } from 'lucide-react'
+import { Zap, TrendingUp, History, Trophy, ArrowRight } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { hatchPrompt, HatchResult } from '../lib/gemini'
+import { hatchPrompt } from '../lib/gemini'
+import type { HatchResult } from '../lib/gemini'
 import { saveSession } from '../lib/sessions'
-import EggAvatar, { AvatarConfig } from '../components/EggAvatar'
-import ScoreBreakdown from '../components/ScoreBreakdown'
+import EggAvatar from '../components/EggAvatar'
+import type { AvatarConfig } from '../components/EggAvatar'
 
 interface Round {
   number: number

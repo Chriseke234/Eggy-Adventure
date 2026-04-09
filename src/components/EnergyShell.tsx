@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Lock, Zap, Sparkles, Award, Star } from 'lucide-react'
+import { Zap, Award, Star } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
@@ -8,7 +8,7 @@ import CharacterSprite from './CharacterSprite'
 const SESSION_LIMIT = 45 * 60 // Default 45 mins, though teacher can override later
 
 const EnergyShell: React.FC = () => {
-  const { user, profile } = useAuth()
+  const { user } = useAuth()
   const [timeLeft, setTimeLeft] = useState(SESSION_LIMIT)
   const [totalTime, setTotalTime] = useState(SESSION_LIMIT)
   const [showAlert, setShowAlert] = useState<{ text: string, type: 'warn' | 'crit' } | null>(null)

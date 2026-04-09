@@ -1,4 +1,9 @@
-import EggAvatar, { AvatarConfig } from '../components/EggAvatar'
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { Microscope, HeartPulse, Zap, Map, BookMarked, Flame, Star, Trophy } from 'lucide-react'
+import EggAvatar from '../components/EggAvatar'
+import type { AvatarConfig } from '../components/EggAvatar'
 
 const DashboardPage: React.FC = () => {
   const { profile } = useAuth()

@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { 
   Zap, 
   Users, 
-  ArrowRight, 
   Sparkles, 
-  MessageCircle, 
   Play,
-  CheckCircle2,
   Loader2
 } from 'lucide-react'
 import EggAvatar from '../components/EggAvatar'
-import { hatchPrompt, HatchResult } from '../lib/gemini'
+import { hatchPrompt } from '../lib/gemini'
+import type { HatchResult } from '../lib/gemini'
 
 const CollaborativeHatchPage: React.FC = () => {
   const { user, profile } = useAuth()

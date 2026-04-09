@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BookOpen, Star, Calendar, Trash2, Search, Filter } from 'lucide-react'
+import { Star, Trash2, Search } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import CharacterSprite from '../components/CharacterSprite'
@@ -26,7 +26,7 @@ const JournalPage: React.FC = () => {
   }, [user])
 
   const fetchSessions = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('sessions')
       .select('*')
       .eq('user_id', user?.id)

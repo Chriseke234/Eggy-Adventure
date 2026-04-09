@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  Users, 
   Trophy, 
   BookOpen, 
   Clock, 
   FileText, 
-  LayoutDashboard, 
   ChevronRight, 
   Calendar,
-  Search,
   Download,
   Zap,
   Star,
   AlertTriangle,
-  Award
+  Award,
+  ArrowRight,
+  CheckCircle2
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
@@ -23,7 +22,8 @@ import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import EggAvatar from '../components/EggAvatar'
 
-import { MISSIONS, Mission } from '../data/missions'
+import { MISSIONS } from '../data/missions'
+
 
 interface Student {
   id: string
@@ -55,7 +55,6 @@ const TeacherDashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'missions' | 'screentime'>('overview')
   const [students, setStudents] = useState<Student[]>([])
   const [classCode, setClassCode] = useState('')
-  const [loading, setLoading] = useState(true)
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const [studentHistory, setStudentHistory] = useState<Session[]>([])
   const [filter, setFilter] = useState<'all' | 'week' | 'month'>('week')
@@ -90,7 +89,6 @@ const TeacherDashboardPage: React.FC = () => {
       .order('xp', { ascending: false })
     
     if (data) setStudents(data)
-    setLoading(false)
   }
 
   const fetchScreenTimeSettings = async () => {
@@ -566,7 +564,7 @@ const TeacherDashboardPage: React.FC = () => {
                          ))}
                          {getWeakAreas(studentHistory).length === 0 && studentHistory.length > 0 && (
                             <div className="flex items-center gap-3 bg-teal/10 p-3 rounded-xl border border-teal/20">
-                               <CheckCircle className="w-4 h-4 text-teal" />
+                               <CheckCircle2 className="w-4 h-4 text-teal" />
                                <div>
                                   <p className="text-[10px] font-black text-teal uppercase tracking-widest">Balanced Explorer</p>
                                   <p className="text-[10px] text-gray-300">Performing well across all categories!</p>
@@ -620,11 +618,6 @@ const TeacherDashboardPage: React.FC = () => {
   )
 }
 
-// Simple Helper Component
-const CheckCircle: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-  </svg>
-)
+// Simple Helper Component removed - using lucide-react instead
 
 export default TeacherDashboardPage

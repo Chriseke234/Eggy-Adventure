@@ -5,7 +5,6 @@ const SESSION_LIMIT = 3 * 60 * 60 // 3 hours in seconds
 
 const ScreenTimeBar: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(SESSION_LIMIT)
-  const [startTime, setStartTime] = useState<number | null>(null)
 
   useEffect(() => {
     // Check for existing session start time
@@ -13,12 +12,10 @@ const ScreenTimeBar: React.FC = () => {
     if (savedStart) {
       const start = parseInt(savedStart)
       const elapsed = Math.floor((Date.now() - start) / 1000)
-      setStartTime(start)
       setTimeLeft(Math.max(0, SESSION_LIMIT - elapsed))
     } else {
       const now = Date.now()
       localStorage.setItem('eggy_session_start', now.toString())
-      setStartTime(now)
       setTimeLeft(SESSION_LIMIT)
     }
   }, [])
