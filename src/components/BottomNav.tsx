@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Home, Compass, BookOpen, User, Users, Zap } from 'lucide-react'
+import { Home, Compass, BookOpen, User, Users, Zap, ShoppingBag } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -10,8 +10,8 @@ const BottomNav: React.FC = () => {
   const studentItems = [
     { icon: Home, label: 'Home', path: '/dashboard' },
     { icon: Compass, label: 'Explore', path: '/explore' },
+    { icon: ShoppingBag, label: 'Shop', path: '/shop' },
     { icon: BookOpen, label: 'Journal', path: '/journal' },
-    { icon: User, label: 'Profile', path: '/profile' },
   ]
 
   const teacherItems = [

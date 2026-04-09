@@ -13,14 +13,30 @@ import {
   AlertTriangle,
   Award,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles,
+  RefreshCw,
+  Target,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis
+} from 'recharts'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import EggAvatar from '../components/EggAvatar'
+import { generateClassInsight } from '../lib/gemini'
 
 import { MISSIONS } from '../data/missions'
 
@@ -60,6 +76,9 @@ const TeacherDashboardPage: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'week' | 'month'>('week')
   const [screenTimeSettings, setScreenTimeSettings] = useState<Record<string, ScreenTimeData>>({})
   const [assignments, setAssignments] = useState<any[]>([])
+  const [aiInsight, setAiInsight] = useState<string | null>(null)
+  const [insightLoading, setInsightLoading] = useState(false)
+  const [classSkillData, setClassSkillData] = useState<any[]>([])
 
   useEffect(() => {
     if (profile?.class_id) {
@@ -67,6 +86,7 @@ const TeacherDashboardPage: React.FC = () => {
       fetchStudents()
       fetchScreenTimeSettings()
       fetchAssignments()
+      fetchClassSkillData()
       subscribeToSessions()
     }
   }, [profile])
@@ -141,6 +161,72 @@ const TeacherDashboardPage: React.FC = () => {
         bonus_minutes: currentBonus + bonus
       })
     if (!error) fetchScreenTimeSettings()
+  }
+
+  const fetchClassSkillData = async () => {
+     try {
+        const { data: studentsData } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('class_id', profile?.class_id)
+        
+        if (!studentsData || studentsData.length === 0) return
+
+        const studentIds = studentsData.map(s => s.id)
+        const { data: sessions } = await supabase
+          .from('sessions')
+          .select('mission_id, scores')
+          .in('user_id', studentIds)
+
+        if (!sessions || sessions.length === 0) return
+
+        const totals: Record<string, { sum: number, count: number }> = {
+          History: { sum: 0, count: 0 },
+          Geography: { sum: 0, count: 0 },
+          Art: { sum: 0, count: 0 },
+          Civics: { sum: 0, count: 0 },
+          Culture: { sum: 0, count: 0 },
+          Innovation: { sum: 0, count: 0 },
+        }
+
+        sessions.forEach(s => {
+          const mission = MISSIONS.find(m => m.id === s.mission_id)
+          if (mission && totals[mission.category]) {
+             const avgScore = (s.scores.clarity + s.scores.specificity + s.scores.creativity + s.scores.effectiveness) / 4
+             totals[mission.category].sum += avgScore
+             totals[mission.category].count += 1
+          }
+        })
+
+        const formatted = Object.keys(totals).map(cat => ({
+          subject: cat,
+          A: totals[cat].count > 0 ? Math.round((totals[cat].sum / totals[cat].count) * 10) : 0,
+        }))
+
+        setClassSkillData(formatted)
+     } catch (err) {
+        console.error(err)
+     }
+  }
+
+  const getAIReport = async () => {
+    if (students.length === 0) return
+    setInsightLoading(true)
+    try {
+      const { data: recentSessions } = await supabase
+        .from('sessions')
+        .select('scores, mission_name')
+        .limit(20)
+      
+      if (recentSessions) {
+        const report = await generateClassInsight(recentSessions)
+        setAiInsight(report)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setInsightLoading(false)
+    }
   }
 
   const subscribeToSessions = () => {
@@ -261,6 +347,40 @@ const TeacherDashboardPage: React.FC = () => {
 
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* AI Insights Card */}
+          <div className="card border-teal/30 bg-teal/5 lg:col-span-3 space-y-6">
+             <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                   <div className="p-2 bg-teal rounded-lg scale-110">
+                      <Sparkles className="w-5 h-5 text-navy" />
+                   </div>
+                   <div>
+                      <h3 className="text-xl font-fredoka text-white">AI Class Insight Oracle</h3>
+                      <p className="text-[10px] text-teal font-black uppercase tracking-widest leading-none mt-1">Pedagogical Analysis Powered by Gemini</p>
+                   </div>
+                </div>
+                <button 
+                  onClick={getAIReport} 
+                  disabled={insightLoading}
+                  className="bg-navy/50 p-2 rounded-xl border border-teal/20 text-teal hover:bg-teal hover:text-navy transition-all flex items-center gap-2 text-[10px] font-black uppercase"
+                >
+                   {insightLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                   Refresh Analysis
+                </button>
+             </div>
+
+             {aiInsight ? (
+               <div className="prose prose-invert max-w-none text-sm text-gray-300 bg-navy/40 p-6 rounded-2xl border border-white/5 whitespace-pre-wrap leading-relaxed">
+                  {aiInsight}
+               </div>
+             ) : (
+               <div className="flex flex-col items-center justify-center py-10 opacity-50 grayscale">
+                  <BookOpen className="w-12 h-12 mb-4" />
+                  <p className="text-sm font-fredoka">No recent insights. Click refresh to consult the Oracle.</p>
+               </div>
+             )}
+          </div>
+
           {/* Main Leaderboard */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
@@ -341,7 +461,7 @@ const TeacherDashboardPage: React.FC = () => {
                 Class Insights
              </h2>
              <div className="grid grid-cols-1 gap-4">
-                <div className="card p-6 bg-gradient-to-br from-teal/20 to-navy-light border-teal/20">
+                 <div className="card p-6 bg-gradient-to-br from-teal/20 to-navy-light border-teal/20">
                    <div className="flex justify-between items-start mb-4">
                       <Award className="w-8 h-8 text-teal" />
                       <span className="text-[10px] font-black text-teal uppercase">Class Average</span>
@@ -350,6 +470,28 @@ const TeacherDashboardPage: React.FC = () => {
                       {students.length > 0 ? Math.round(students.reduce((a,b) => a + b.xp, 0) / students.length) : 0} XP
                    </div>
                    <p className="text-xs text-gray-500 mt-2">Overall class growth this week: <span className="text-teal">+12%</span></p>
+                </div>
+
+                <div className="card p-6 space-y-4">
+                   <div className="flex items-center gap-2">
+                      <Target className="w-5 h-5 text-gold" />
+                      <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mt-1">Global Skill Balance</h3>
+                   </div>
+                   <div className="h-48 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={classSkillData}>
+                            <PolarGrid stroke="#ffffff10" />
+                            <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 8, fontWeight: 900 }} />
+                            <Radar
+                               name="Class Avg"
+                               dataKey="A"
+                               stroke="#E9C46A"
+                               fill="#E9C46A"
+                               fillOpacity={0.3}
+                            />
+                         </RadarChart>
+                      </ResponsiveContainer>
+                   </div>
                 </div>
 
                 <div className="card p-6 border-orange/20">

@@ -16,6 +16,7 @@ import TeacherRoute from './components/TeacherRoute'
 import EnergyShell from './components/EnergyShell'
 import BottomNav from './components/BottomNav'
 import JournalPage from './pages/JournalPage'
+import ShellShopPage from './pages/ShellShopPage'
 import { syncOfflineQueue } from './lib/offline'
 import { WifiOff } from 'lucide-react'
 
@@ -120,6 +121,11 @@ function AppContent() {
           <Route path="/journal" element={
             <ProtectedRoute>
               <JournalPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/shop" element={
+            <ProtectedRoute>
+              <ShellShopPage />
             </ProtectedRoute>
           } />
         </Routes>

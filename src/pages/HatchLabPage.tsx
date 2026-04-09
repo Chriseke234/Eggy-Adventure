@@ -13,6 +13,7 @@ import EggAvatar from '../components/EggAvatar'
 import type { AvatarConfig } from '../components/EggAvatar'
 import VoiceInput from '../components/VoiceInput'
 import CharacterSprite from '../components/CharacterSprite'
+import { audio } from '../lib/audio'
 
 type FlowState = 'selecting' | 'prompting' | 'hatching' | 'result'
 
@@ -40,8 +41,10 @@ const HatchLabPage: React.FC = () => {
     setLoading(true)
     
     try {
+      audio.playHatching()
       const hatchResult = await hatchPrompt(selectedMission.name, prompt)
       setResult(hatchResult)
+      audio.playSuccess()
       
       // Save to Supabase automatically as per request
       if (user) {
@@ -82,6 +85,7 @@ const HatchLabPage: React.FC = () => {
                   transition={{ delay: index * 0.1 }}
                   key={mission.id}
                   onClick={() => {
+                    audio.playClick()
                     setSelectedMission(mission)
                     setState('prompting')
                   }}
@@ -94,6 +98,7 @@ const HatchLabPage: React.FC = () => {
                     <h3 className="font-fredoka text-lg text-white group-hover:text-gold transition-colors">{mission.name}</h3>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full text-white/50">{mission.difficulty}</span>
+                      <span className="text-[10px] bg-teal/10 px-2 py-0.5 rounded-full text-teal/70 font-black uppercase">{mission.category}</span>
                     </div>
                   </div>
                 </motion.button>
@@ -111,7 +116,7 @@ const HatchLabPage: React.FC = () => {
             exit={{ opacity: 0, scale: 1.05 }}
             className="space-y-8"
           >
-            <button onClick={() => setState('selecting')} className="flex items-center gap-2 text-teal font-bold text-xs uppercase tracking-widest hover:text-white transition-colors">
+            <button onClick={() => { audio.playClick(); setState('selecting'); }} className="flex items-center gap-2 text-teal font-bold text-xs uppercase tracking-widest hover:text-white transition-colors">
               <ChevronLeft className="w-4 h-4" /> Change Mission
             </button>
 
@@ -176,7 +181,16 @@ const HatchLabPage: React.FC = () => {
             exit={{ opacity: 0 }}
             className="flex flex-col items-center justify-center min-h-[50vh]"
           >
-            <EggCracking />
+            <motion.div
+              animate={{
+                x: [-2, 2, -2, 2, 0],
+                rotate: [-1, 1, -1, 1, 0]
+              }}
+              transition={{ repeat: Infinity, duration: 0.1 }}
+            >
+              <EggCracking />
+            </motion.div>
+            <p className="mt-8 font-fredoka text-xl text-teal animate-pulse">Eggy is thinking...</p>
           </motion.div>
         )}
 

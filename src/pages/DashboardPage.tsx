@@ -1,9 +1,13 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { Microscope, HeartPulse, Zap, Map, BookMarked, Flame, Star, Trophy } from 'lucide-react'
+import { Microscope, HeartPulse, Zap, Map, BookMarked, Flame, Star, Trophy, Target } from 'lucide-react'
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts'
 import EggAvatar from '../components/EggAvatar'
 import type { AvatarConfig } from '../components/EggAvatar'
+import { supabase } from '../lib/supabase'
+import { MISSIONS } from '../data/missions'
+import { useEffect, useState } from 'react'
 
 const DashboardPage: React.FC = () => {
   const { profile } = useAuth()
@@ -17,6 +21,65 @@ const DashboardPage: React.FC = () => {
   }
 
   const avatarConfig = profile?.avatar_config || defaultAvatarConfig
+  const [skillData, setSkillData] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (profile?.id) {
+       fetchSkillData()
+    }
+  }, [profile])
+
+  const fetchSkillData = async () => {
+     try {
+        const { data: sessions } = await supabase
+          .from('sessions')
+          .select('mission_id, scores')
+          .eq('user_id', profile?.id)
+        
+        if (!sessions || sessions.length === 0) {
+           setSkillData([
+             { subject: 'History', A: 0 },
+             { subject: 'Geography', A: 0 },
+             { subject: 'Art', A: 0 },
+             { subject: 'Civics', A: 0 },
+             { subject: 'Culture', A: 0 },
+             { subject: 'Innovation', A: 0 },
+           ])
+           return
+        }
+
+        const totals: Record<string, { sum: number, count: number }> = {
+          History: { sum: 0, count: 0 },
+          Geography: { sum: 0, count: 0 },
+          Art: { sum: 0, count: 0 },
+          Civics: { sum: 0, count: 0 },
+          Culture: { sum: 0, count: 0 },
+          Innovation: { sum: 0, count: 0 },
+        }
+
+        sessions.forEach(s => {
+          const mission = MISSIONS.find(m => m.id === s.mission_id)
+          if (mission && totals[mission.category]) {
+             const avgScore = (s.scores.clarity + s.scores.specificity + s.scores.creativity + s.scores.effectiveness) / 4
+             totals[mission.category].sum += avgScore
+             totals[mission.category].count += 1
+          }
+        })
+
+        const formatted = Object.keys(totals).map(cat => ({
+          subject: cat,
+          A: totals[cat].count > 0 ? Math.round((totals[cat].sum / totals[cat].count) * 10) : 0,
+          fullMark: 100
+        }))
+
+        setSkillData(formatted)
+     } catch (err) {
+        console.error(err)
+     } finally {
+        setLoading(false)
+     }
+  }
 
   const modes = [
     { id: 'lab', name: 'Hatch Lab', icon: Microscope, path: '/hatch-lab', color: 'bg-teal', textColor: 'text-white' },
@@ -101,6 +164,42 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Skill Constellations */}
+      <div className="card space-y-6">
+        <div className="flex items-center justify-between">
+           <h3 className="text-xl font-fredoka text-gold flex items-center gap-2">
+             <Target className="w-5 h-5" />
+             Skill Constellations
+           </h3>
+           <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-lg">Mastery Mode</div>
+        </div>
+
+        <div className="h-[250px] w-full flex items-center justify-center">
+           {!loading && skillData.length > 0 ? (
+             <ResponsiveContainer width="100%" height="100%">
+               <RadarChart cx="50%" cy="50%" outerRadius="80%" data={skillData}>
+                 <PolarGrid stroke="#ffffff10" />
+                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} />
+                 <Radar
+                   name="Score"
+                   dataKey="A"
+                   stroke="#E9C46A"
+                   fill="#E9C46A"
+                   fillOpacity={0.3}
+                 />
+               </RadarChart>
+             </ResponsiveContainer>
+           ) : (
+             <div className="animate-pulse flex flex-col items-center gap-3">
+                <div className="w-32 h-32 rounded-full border-4 border-dashed border-white/5" />
+                <p className="text-xs text-gray-500 font-bold uppercase">Mapping your potential...</p>
+             </div>
+           )}
+        </div>
+        
+        <p className="text-[10px] text-center text-gray-400 italic">"Your mission choices shape the stars of your knowledge." — Eggy</p>
+      </div>
 
       {/* Daily Progress Card */}
       <div className="card space-y-4">

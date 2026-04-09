@@ -50,3 +50,30 @@ export async function hatchPrompt(missionTitle: string, userPrompt: string): Pro
   
   throw new Error("Could not parse Eggy's response");
 }
+export async function generateClassInsight(sessions: any[]): Promise<string> {
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  const summaryData = sessions.map(s => ({
+    mission: s.mission_name,
+    scores: s.scores
+  }));
+
+  const prompt = `
+    You are an expert pedagogical AI analyst for the "Eggy Adventures" platform.
+    Analyze the following class performance data (recent sessions) and provide a concise, insightful report for the teacher.
+    
+    Data: ${JSON.stringify(summaryData)}
+    
+    The report should include:
+    1. Overall class strengths (e.g., "The class excels in Creativity...").
+    2. Common areas for improvement (e.g., "Many students struggle with Specificity...").
+    3. A "Pedagogical Tip": One actionable exercise the teacher can do offline to help.
+    
+    Keep the tone professional, encouraging, and Nigerian-centric if possible. 
+    Format with clear headings and bullet points. Maximum 200 words.
+  `;
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  return response.text();
+}
