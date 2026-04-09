@@ -41,7 +41,7 @@ const HatchLabPage: React.FC = () => {
     setLoading(true)
     
     try {
-      audio.playHatching()
+      audio.playHatch()
       const hatchResult = await hatchPrompt(selectedMission.name, prompt)
       setResult(hatchResult)
       audio.playSuccess()
