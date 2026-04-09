@@ -86,7 +86,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const signIn = async (email: string) => {
-    return supabase.auth.signInWithOtp({ email })
+    return supabase.auth.signInWithOtp({ 
+      email,
+      options: {
+        emailRedirectTo: window.location.origin
+      }
+    })
   }
 
   const signOut = async () => {
@@ -112,6 +117,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const createClass = async (name: string) => {
     if (!user) return { data: null, error: new Error('User not found') }
+
+    // Ensure profile exists FIRST to satisfy foreign key constraints
+    await updateProfile({ 
+      role: 'teacher',
+      display_name: 'Teacher' 
+    })
 
     // Generate a unique 6-character code
     const code = Math.random().toString(36).substring(2, 8).toUpperCase()
